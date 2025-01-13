@@ -28,6 +28,7 @@ import StepProviderLogo from '@renderer/assets/images/providers/step.png'
 import TogetherProviderLogo from '@renderer/assets/images/providers/together.png'
 import ZeroOneProviderLogo from '@renderer/assets/images/providers/zero-one.png'
 import ZhipuProviderLogo from '@renderer/assets/images/providers/zhipu.png'
+import QwenLMProviderLogo from '@renderer/assets/images/providers/qwenlm.png'
 
 export function getProviderLogo(providerId: string) {
   switch (providerId) {
@@ -91,6 +92,8 @@ export function getProviderLogo(providerId: string) {
       return MistralProviderLogo
     case 'jina':
       return JinaProviderLogo
+    case 'qwenlm':
+      return QwenLMProviderLogo
     default:
       return undefined
   }

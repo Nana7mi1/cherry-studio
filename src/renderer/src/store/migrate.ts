@@ -790,6 +790,26 @@ const migrateConfig = {
       disabled: []
     }
     return state
+  },
+  '55': (state: RootState) => {
+    return {
+      ...state,
+      llm: {
+        ...state.llm,
+        providers: [
+          ...state.llm.providers,
+          {
+            id: 'qwenlm',
+            name: 'QwenLM',
+            apiKey: '',
+            apiHost: 'https://chat.qwenlm.ai/api/',
+            models: SYSTEM_MODELS.qwenlm,
+            isSystem: true,
+            enabled: false
+          }
+        ]
+      }
+    }
   }
 }
 
