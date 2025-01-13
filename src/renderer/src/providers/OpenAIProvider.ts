@@ -134,11 +134,6 @@ export default class OpenAIProvider extends BaseProvider {
             type: 'image',
             image: imageId
           })
-
-          return {
-            role: message.role,
-            content: [...parts, ...qwenlm_image_url]
-          } as ChatCompletionMessageParam
         }
         if ([FileTypes.TEXT, FileTypes.DOCUMENT].includes(file.type)) {
           const fileContent = await (await window.api.file.read(file.id + file.ext)).trim()
@@ -148,6 +143,10 @@ export default class OpenAIProvider extends BaseProvider {
           })
         }
       }
+      return {
+        role: message.role,
+        content: [...parts, ...qwenlm_image_url]
+      } as ChatCompletionMessageParam
     } else {
       for (const file of message.files || []) {
         if (file.type === FileTypes.IMAGE && isVision) {
