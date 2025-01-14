@@ -24,16 +24,6 @@ const initialState: LlmState = {
   translateModel: SYSTEM_MODELS.silicon[0],
   providers: [
     {
-      id: 'qwenlm',
-      name: 'QwenLM',
-      type: 'openai',
-      apiKey: '',
-      apiHost: 'https://chat.qwenlm.ai/api/',
-      models: SYSTEM_MODELS.qwenlm,
-      isSystem: true,
-      enabled: false
-    },
-    {
       id: 'silicon',
       name: 'Silicon',
       type: 'openai',
@@ -331,6 +321,16 @@ const initialState: LlmState = {
       apiKey: '',
       apiHost: 'https://api.jina.ai',
       models: SYSTEM_MODELS.jina,
+      isSystem: true,
+      enabled: false
+    },
+    {
+      id: 'qwenlm',
+      name: 'QwenLM',
+      type: 'openai',
+      apiKey: '',
+      apiHost: 'https://chat.qwenlm.ai/api/',
+      models: SYSTEM_MODELS.qwenlm,
       isSystem: true,
       enabled: false
     }
