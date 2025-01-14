@@ -421,5 +421,16 @@ export const PROVIDER_CONFIG = {
       docs: 'https://learn.microsoft.com/en-us/azure/ai-services/openai/',
       models: 'https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models'
     }
+  },
+  qwenlm: {
+    api: {
+      url: 'https://chat.qwenlm.ai/api/'
+    },
+    websites: {
+      official: 'https://chat.qwenlm.ai',
+      apiKey: 'https://chat.qwenlm.ai',
+      docs: 'https://chat.qwenlm.ai',
+      models: 'https://chat.qwenlm.ai'
+    }
   }
 }
