@@ -103,7 +103,7 @@ export type Provider = {
 
 export type ProviderType = 'openai' | 'anthropic' | 'gemini'
 
-export type ModelType = 'text' | 'vision' | 'embedding'
+export type ModelType = 'text' | 'vision' | 'embedding' | 'rerank'
 
 export type Model = {
   id: string
@@ -227,6 +227,8 @@ export interface KnowledgeBase {
   created_at: number
   updated_at: number
   version: number
+  chunkSize?: number
+  chunkOverlap?: number
 }
 
 export type KnowledgeBaseParams = {
@@ -236,6 +238,8 @@ export type KnowledgeBaseParams = {
   apiKey: string
   apiVersion?: string
   baseURL: string
+  chunkSize?: number
+  chunkOverlap?: number
 }
 
 export type GenerateImageParams = {

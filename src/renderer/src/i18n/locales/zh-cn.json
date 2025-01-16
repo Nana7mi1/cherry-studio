@@ -591,7 +591,9 @@
       "model_info": "模型信息",
       "not_support": "知识库数据库引擎已更新，该知识库将不再支持，请重新创建知识库",
       "no_provider": "知识库模型服务商丢失，该知识库将不再支持，请重新创建知识库",
-      "source": "来源"
+      "source": "来源",
+      "chunk_size": "分段大小",
+      "chunk_overlap": "分段重叠"
     },
     "models": {
       "pinned": "已固定",

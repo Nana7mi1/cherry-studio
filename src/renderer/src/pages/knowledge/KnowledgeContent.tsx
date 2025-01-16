@@ -16,7 +16,7 @@ import { useKnowledge } from '@renderer/hooks/useKnowledge'
 import FileManager from '@renderer/services/FileManager'
 import { getProviderName } from '@renderer/services/ProviderService'
 import { FileType, FileTypes, KnowledgeBase } from '@renderer/types'
-import { Alert, Button, Card, Divider, message, Tag, Typography, Upload } from 'antd'
+import { Alert, Button, Card, Divider, message, Tag, Typography, Upload, InputNumber } from 'antd'
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -50,7 +50,8 @@ const KnowledgeContent: FC<KnowledgeContentProps> = ({ selectedBase }) => {
     removeItem,
     getProcessingStatus,
     addNote,
-    addDirectory
+    addDirectory,
+    updateKnowledgeBase
   } = useKnowledge(selectedBase.id || '')
 
   const providerName = getProviderName(base?.model.provider || '')
@@ -359,6 +360,29 @@ const KnowledgeContent: FC<KnowledgeContentProps> = ({ selectedBase }) => {
         <Tag color="blue">{base.model.name}</Tag>
         <Tag color="cyan">{t('models.dimensions', { dimensions: base.dimensions || 0 })}</Tag>
         {providerName && <Tag color="purple">{providerName}</Tag>}
+
+        <ChunkSettings>
+          <div className="setting-item">
+            <label>{t('knowledge.chunk_size')}</label>
+            <InputNumber
+              min={100}
+              value={base.chunkSize || 1000}
+              onChange={(value) => {
+                if (value) updateKnowledgeBase({ ...base, chunkSize: value })
+              }}
+            />
+          </div>
+          <div className="setting-item">
+            <label>{t('knowledge.chunk_overlap')}</label>
+            <InputNumber
+              min={0}
+              value={base.chunkOverlap || 200}
+              onChange={(value) => {
+                if (value) updateKnowledgeBase({ ...base, chunkOverlap: value })
+              }}
+            />
+          </div>
+        </ChunkSettings>
       </ModelInfo>
 
       <IndexSection>
@@ -506,6 +530,14 @@ const StatusIconWrapper = styled.div`
 const RefreshIcon = styled(RedoOutlined)`
   font-size: 15px !important;
   color: var(--color-text-2);
+`
+
+const ChunkSettings = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-left: 50px;
 `
 
 export default KnowledgeContent

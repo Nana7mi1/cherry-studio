@@ -13,6 +13,7 @@ import { AzureOpenAiEmbeddings, OpenAiEmbeddings } from '@llm-tools/embedjs-open
 import { getInstanceName } from '@main/utils'
 import { FileType, KnowledgeBaseParams, KnowledgeItem } from '@types'
 import { app } from 'electron'
+import Logger from 'electron-log'
 
 class KnowledgeService {
   private storageDir = path.join(app.getPath('userData'), 'Data', 'KnowledgeBase')
@@ -109,7 +110,14 @@ class KnowledgeService {
       const file = item.content as FileType
 
       if (file.ext === '.pdf') {
-        return await ragApplication.addLoader(new PdfLoader({ filePathOrUrl: file.path }) as any, forceReload)
+        return await ragApplication.addLoader(
+          new PdfLoader({
+            filePathOrUrl: file.path,
+            chunkSize: base.chunkSize,
+            chunkOverlap: base.chunkOverlap
+          }) as any,
+          forceReload
+        )
       }
 
       if (file.ext === '.docx') {
@@ -130,7 +138,14 @@ class KnowledgeService {
 
       const fileContent = fs.readFileSync(file.path, 'utf-8')
 
-      return await ragApplication.addLoader(new TextLoader({ text: fileContent }), forceReload)
+      return await ragApplication.addLoader(
+        new TextLoader({
+          text: fileContent,
+          chunkSize: base.chunkSize,
+          chunkOverlap: base.chunkOverlap
+        }),
+        forceReload
+      )
     }
 
     return { entriesAdded: 0, uniqueId: '', loaderType: '' }
@@ -149,7 +164,55 @@ class KnowledgeService {
     { search, base }: { search: string; base: KnowledgeBaseParams }
   ): Promise<ExtractChunkData[]> => {
     const ragApplication = await this.getRagApplication(base)
-    return await ragApplication.search(search)
+    const searchResults = await ragApplication.search(search)
+
+    // If no results, return empty array
+    if (!searchResults.length) {
+      return []
+    }
+
+    try {
+      // Prepare documents for reranking
+      const documents = searchResults.map((result) => result.pageContent)
+
+      // Call Silicon Flow rerank API
+      const response = await fetch('https://api.siliconflow.cn/v1/rerank', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer sk-mnuosqqaykbxtkdngvufjfyeinuoopqitzphobygtnitgehv'
+        },
+        body: JSON.stringify({
+          model: 'BAAI/bge-reranker-v2-m3',
+          query: search,
+          documents,
+          top_n: documents.length,
+          return_documents: false,
+          max_chunks_per_doc: base.chunkSize || 500,
+          overlap_tokens: base.chunkOverlap || 50
+        })
+      })
+
+      if (!response.ok) {
+        Logger.error('Rerank API error:', await response.text())
+        return searchResults
+      }
+
+      const rerankResult = await response.json()
+
+      // Reorder the search results based on reranking scores
+      return rerankResult.results.map((result) => {
+        const originalResult = searchResults[result.index]
+        return {
+          ...originalResult,
+          score: result.relevance_score
+        }
+      })
+    } catch (error) {
+      Logger.error('Error during reranking:', error)
+      // Fall back to original search results if reranking fails
+      return searchResults
+    }
   }
 }
 
