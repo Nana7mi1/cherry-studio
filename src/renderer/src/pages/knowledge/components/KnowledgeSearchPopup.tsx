@@ -1,6 +1,6 @@
 import type { ExtractChunkData } from '@llm-tools/embedjs-interfaces'
 import { TopView } from '@renderer/components/TopView'
-import { getFileFromUrl, getKnowledgeBaseParams } from '@renderer/services/KnowledgeService'
+import { getFileFromUrl, getKnowledgeBaseParams, getRerankResult } from '@renderer/services/KnowledgeService'
 import { FileType, KnowledgeBase } from '@renderer/types'
 import { Input, List, Modal, Spin, Typography } from 'antd'
 import { useState } from 'react'
@@ -45,7 +45,9 @@ const PopupContainer: React.FC<Props> = ({ base, resolve }) => {
           return { ...item, file }
         })
       )
-      setResults(results)
+
+      const rerankResults = await getRerankResult(base, value, results)
+      setResults(rerankResults)
     } catch (error) {
       console.error('Search failed:', error)
     } finally {

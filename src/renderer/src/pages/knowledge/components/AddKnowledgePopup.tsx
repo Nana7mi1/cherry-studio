@@ -1,5 +1,5 @@
 import { TopView } from '@renderer/components/TopView'
-import { isEmbeddingModel } from '@renderer/config/models'
+import { isEmbeddingModel, isRerankModel } from '@renderer/config/models'
 import { useKnowledgeBases } from '@renderer/hooks/useKnowledge'
 import { useProviders } from '@renderer/hooks/useProvider'
 import AiProvider from '@renderer/providers/AiProvider'
@@ -21,6 +21,7 @@ interface FormData {
   model: string
   chunkSize: number
   chunkOverlap: number
+  rerankModel: string
 }
 
 interface Props extends ShowParams {
@@ -53,10 +54,25 @@ const PopupContainer: React.FC<Props> = ({ title, resolve }) => {
     }))
     .filter((group) => group.options.length > 0)
 
+  const rerankOptions = providers
+    .filter((p) => p.models.length > 0)
+    .map((p) => ({
+      label: p.isSystem ? t(`provider.${p.id}`) : p.name,
+      title: p.name,
+      options: sortBy(p.models, 'name')
+        .filter((model) => isRerankModel(model))
+        .map((m) => ({
+          label: m.name,
+          value: getModelUniqId(m)
+        }))
+    }))
+    .filter((group) => group.options.length > 0)
+
   const onOk = async () => {
     try {
       const values = await form.validateFields()
       const selectedModel = find(allModels, JSON.parse(values.model)) as Model
+      const rerankModel = find(allModels, JSON.parse(values.rerankModel)) as Model
 
       if (selectedModel) {
         setLoading(true)
@@ -88,7 +104,8 @@ const PopupContainer: React.FC<Props> = ({ title, resolve }) => {
           items: [],
           created_at: Date.now(),
           updated_at: Date.now(),
-          version: 1
+          version: 1,
+          rerankModel: rerankModel
         }
 
         await window.api.knowledgeBase.create(getKnowledgeBaseParams(newBase))
@@ -148,6 +165,10 @@ const PopupContainer: React.FC<Props> = ({ title, resolve }) => {
           label={t('knowledge.chunk_overlap')}
           rules={[{ required: false, message: t('message.error.enter.chunk_overlap') }]}>
           <InputNumber style={{ width: '100%' }} />
+        </Form.Item>
+
+        <Form.Item name="rerankModel" label={t('models.rerank_model')}>
+          <Select style={{ width: '100%' }} options={rerankOptions} placeholder={t('settings.models.empty')} />
         </Form.Item>
       </Form>
     </Modal>

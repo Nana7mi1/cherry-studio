@@ -24,7 +24,8 @@ export const getKnowledgeBaseParams = (base: KnowledgeBase): KnowledgeBaseParams
     apiVersion: provider.apiVersion,
     baseURL: host,
     chunkSize: base.chunkSize || 500,
-    chunkOverlap: base.chunkOverlap || 50
+    chunkOverlap: base.chunkOverlap || 50,
+    rerankModel: base.rerankModel?.id || 'BAAI/bge-reranker-v2-m3'
   }
 }
 
@@ -92,4 +93,51 @@ export const getKnowledgeReferences = async (base: KnowledgeBase, message: Messa
   const referencesContent = `\`\`\`json\n${JSON.stringify(references, null, 2)}\n\`\`\``
 
   return referencesContent
+}
+
+export const getRerankResult = async (base: KnowledgeBase, search: string, searchResults: ExtractChunkData[]) => {
+  if (!searchResults.length) {
+    return searchResults
+  }
+
+  try {
+    console.log(base)
+    const documents = searchResults.map((result) => result.pageContent)
+    const rerankModel = base.rerankModel
+    const aiProvider = getProviderByModel(rerankModel)
+    const response = await fetch(`${aiProvider.apiHost}/v1/rerank`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${aiProvider.apiKey}`
+      },
+      body: JSON.stringify({
+        model: base.rerankModel?.id,
+        query: search,
+        documents,
+        top_n: documents.length,
+        return_documents: false,
+        max_chunks_per_doc: base.chunkSize,
+        overlap_tokens: base.chunkOverlap
+      })
+    })
+
+    if (!response.ok) {
+      console.error('Rerank API error:', await response.text())
+      return searchResults
+    }
+
+    const rerankResult = await response.json()
+
+    return rerankResult.results.map((result) => {
+      const originalResult = searchResults[result.index]
+      return {
+        ...originalResult,
+        score: result.relevance_score
+      }
+    })
+  } catch (error) {
+    console.error('Error during reranking:', error)
+    return searchResults
+  }
 }

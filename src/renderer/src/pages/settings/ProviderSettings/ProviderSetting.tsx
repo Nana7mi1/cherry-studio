@@ -8,7 +8,7 @@ import {
   SettingOutlined
 } from '@ant-design/icons'
 import ModelTags from '@renderer/components/ModelTags'
-import { EMBEDDING_REGEX, getModelLogo, VISION_REGEX } from '@renderer/config/models'
+import { EMBEDDING_REGEX, getModelLogo, RERANK_REGEX, VISION_REGEX } from '@renderer/config/models'
 import { PROVIDER_CONFIG } from '@renderer/config/providers'
 import { useTheme } from '@renderer/context/ThemeProvider'
 import { useAssistants, useDefaultModel } from '@renderer/hooks/useAssistant'
@@ -177,7 +177,12 @@ const ProviderSetting: FC<Props> = ({ provider: _provider }) => {
         onChange={(types) => onUpdateModelTypes(model, types as ModelType[])}
         options={[
           { label: t('models.type.vision'), value: 'vision', disabled: VISION_REGEX.test(model.id) },
-          { label: t('models.type.embedding'), value: 'embedding', disabled: EMBEDDING_REGEX.test(model.id) }
+          { label: t('models.type.rerank'), value: 'rerank', disabled: RERANK_REGEX.test(model.id) },
+          {
+            label: t('models.type.embedding'),
+            value: 'embedding',
+            disabled: !RERANK_REGEX.test(model.id) && EMBEDDING_REGEX.test(model.id)
+          }
         ]}
       />
     </div>

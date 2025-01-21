@@ -1,4 +1,4 @@
-import { isEmbeddingModel, isVisionModel, isWebSearchModel } from '@renderer/config/models'
+import { isEmbeddingModel, isRerankModel, isVisionModel, isWebSearchModel } from '@renderer/config/models'
 import { Model } from '@renderer/types'
 import { isFreeModel } from '@renderer/utils'
 import { Tag } from 'antd'
@@ -27,6 +27,11 @@ const ModelTags: FC<ModelTagsProps> = ({ model, showFree = true }) => {
       {isEmbeddingModel(model) && (
         <Tag style={{ marginLeft: 10 }} color="orange">
           {t('models.embedding')}
+        </Tag>
+      )}
+      {isRerankModel(model) && (
+        <Tag style={{ marginLeft: 10 }} color="blue">
+          {t('models.rerank')}
         </Tag>
       )}
     </>

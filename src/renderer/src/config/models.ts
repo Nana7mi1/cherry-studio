@@ -154,8 +154,9 @@ export const VISION_REGEX = new RegExp(
 )
 
 export const TEXT_TO_IMAGE_REGEX = /flux|diffusion|stabilityai|sd-|dall|cogview/i
-export const EMBEDDING_REGEX = /(?:^text-|embed|rerank|davinci|babbage|bge-|e5-|LLM2Vec|retrieval|uae-|gte-|jina)/i
-export const NOT_SUPPORTED_REGEX = /(?:^tts|rerank|whisper|speech)/i
+export const EMBEDDING_REGEX = /(?:^text-|embed|davinci|babbage|bge-|e5-|LLM2Vec|retrieval|uae-|gte-|jina)/i
+export const NOT_SUPPORTED_REGEX = /(?:^tts|whisper|speech)/i
+export const RERANK_REGEX = /(?:reranker)/i
 
 export function getModelLogo(modelId: string) {
   const isLight = true
@@ -1079,7 +1080,17 @@ export function isEmbeddingModel(model: Model): boolean {
     return false
   }
 
-  return EMBEDDING_REGEX.test(model.id) || model.type?.includes('embedding') || false
+  return (
+    (!RERANK_REGEX.test(model.id) && (EMBEDDING_REGEX.test(model.id) || model.type?.includes('embedding'))) || false
+  )
+}
+
+export function isRerankModel(model: Model): boolean {
+  if (!model) {
+    return false
+  }
+
+  return RERANK_REGEX.test(model.id) || model.type?.includes('rerank') || false
 }
 
 export function isVisionModel(model: Model): boolean {

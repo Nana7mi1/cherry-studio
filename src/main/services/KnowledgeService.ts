@@ -164,55 +164,7 @@ class KnowledgeService {
     { search, base }: { search: string; base: KnowledgeBaseParams }
   ): Promise<ExtractChunkData[]> => {
     const ragApplication = await this.getRagApplication(base)
-    const searchResults = await ragApplication.search(search)
-
-    // If no results, return empty array
-    if (!searchResults.length) {
-      return []
-    }
-
-    try {
-      // Prepare documents for reranking
-      const documents = searchResults.map((result) => result.pageContent)
-
-      // Call Silicon Flow rerank API
-      const response = await fetch('https://api.siliconflow.cn/v1/rerank', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer sk-mnuosqqaykbxtkdngvufjfyeinuoopqitzphobygtnitgehv'
-        },
-        body: JSON.stringify({
-          model: 'BAAI/bge-reranker-v2-m3',
-          query: search,
-          documents,
-          top_n: documents.length,
-          return_documents: false,
-          max_chunks_per_doc: base.chunkSize || 500,
-          overlap_tokens: base.chunkOverlap || 50
-        })
-      })
-
-      if (!response.ok) {
-        Logger.error('Rerank API error:', await response.text())
-        return searchResults
-      }
-
-      const rerankResult = await response.json()
-
-      // Reorder the search results based on reranking scores
-      return rerankResult.results.map((result) => {
-        const originalResult = searchResults[result.index]
-        return {
-          ...originalResult,
-          score: result.relevance_score
-        }
-      })
-    } catch (error) {
-      Logger.error('Error during reranking:', error)
-      // Fall back to original search results if reranking fails
-      return searchResults
-    }
+    return await ragApplication.search(search)
   }
 }
 
