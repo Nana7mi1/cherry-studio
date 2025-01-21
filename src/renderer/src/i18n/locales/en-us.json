@@ -64,14 +64,14 @@
       "default.description": "Hello, I'm Default Assistant. You can start chatting with me right away",
       "default.name": "⭐️ Default Assistant",
       "default.topic.name": "Default Topic",
-      "input.clear": "Clear",
+      "input.clear": "Clear {{Command}}",
       "input.clear.content": "Do you want to clear all messages of the current topic?",
       "input.clear.title": "Clear all messages?",
       "input.collapse": "Collapse",
       "input.context_count.tip": "Context Count",
       "input.estimated_tokens.tip": "Estimated tokens",
       "input.expand": "Expand",
-      "input.new.context": "Clear Context",
+      "input.new.context": "Clear Context {{Command}}",
       "input.new_topic": "New Topic {{Command}}",
       "input.pause": "Pause",
       "input.placeholder": "Type your message here...",
@@ -86,6 +86,7 @@
       "message.new.branch.created": "New Branch Created",
       "message.regenerate.model": "Switch Model",
       "message.new.context": "New Context",
+      "message.useful": "Helpful",
       "save": "Save",
       "settings.code_collapsible": "Code block collapsible",
       "settings.context_count": "Context",
@@ -113,7 +114,9 @@
       "topics.move_to": "Move to",
       "topics.title": "Topics",
       "translate": "Translate",
-      "resend": "Resend"
+      "resend": "Resend",
+      "thinking": "Thinking",
+      "deeply_thought": "Deeply thought ({{secounds}} seconds)"
     },
     "common": {
       "and": "and",
@@ -375,7 +378,10 @@
         "webdav.path": "WebDAV Path",
         "webdav.path.placeholder": "/backup",
         "webdav.autoSync": "Auto Backup",
+        "webdav.minute": "Minute",
         "webdav.minutes": "Minutes",
+        "webdav.hour": "Hour",
+        "webdav.hours": "Hours",
         "webdav.restore.button": "Restore from WebDAV",
         "webdav.title": "WebDAV",
         "webdav.user": "WebDAV User",
@@ -384,6 +390,12 @@
         "webdav.noSync": "Waiting for next backup",
         "webdav.syncError": "Backup Error",
         "webdav.lastSync": "Last Backup"
+      },
+      "quickAssistant": {
+        "title": "Quick Assistant",
+        "click_tray_to_show": "Click the tray icon to start",
+        "enable_quick_assistant": "Enable Quick Assistant",
+        "use_shortcut_to_show": "Right-click the tray icon or use shortcuts to start"
       },
       "display.title": "Display Settings",
       "font_size.title": "Message font size",
@@ -519,7 +531,10 @@
         "toggle_show_assistants": "Toggle Assistants",
         "toggle_show_topics": "Toggle Topics",
         "copy_last_message": "Copy Last Message",
-        "search_message": "Search Message"
+        "search_message": "Search Message",
+        "mini_window": "Quick Assistant",
+        "clear_topic": "Clear Messages",
+        "toggle_new_context": "Clear Context"
       },
       "theme.auto": "Auto",
       "theme.dark": "Dark",
@@ -552,7 +567,8 @@
     },
     "tray": {
       "quit": "Quit",
-      "show_window": "Show Window"
+      "show_window": "Show Window",
+      "show_mini_window": "Quick Assistant"
     },
     "words": {
       "knowledgeGraph": "Knowledge Graph",
@@ -634,7 +650,32 @@
       }
     },
     "prompts": {
-      "summarize": "You are an assistant who is good at conversation. You need to summarize the user's conversation into a title of 10 characters or less, ensuring it matches the user's primary language without using punctuation or other special symbols."
+      "title": "You are an assistant who is good at conversation. You need to summarize the user's conversation into a title of 10 characters or less, ensuring it matches the user's primary language without using punctuation or other special symbols.",
+      "explanation": "Explain this concept to me",
+      "summarize": "Summarize this text"
+    },
+    "miniwindow": {
+      "feature": {
+        "chat": "Answer this question",
+        "translate": "Text translation",
+        "summary": "Content summary",
+        "explanation": "Explanation"
+      },
+      "clipboard": {
+        "empty": "Clipboard is empty"
+      },
+      "input": {
+        "placeholder": {
+          "title": "What do you want to do with this text?",
+          "empty": "Ask {{model}} for help..."
+        }
+      },
+      "footer": {
+        "esc": "Press ESC {{action}}",
+        "esc_close": "close the window",
+        "esc_back": "back",
+        "copy_last_message": "Press C to copy"
+      }
     }
   }
 }

@@ -26,6 +26,18 @@ export function isJSON(str: any): boolean {
   }
 }
 
+export function parseJSON(str: string) {
+  if (str === 'undefined') {
+    return undefined
+  }
+
+  try {
+    return JSON.parse(str)
+  } catch (e) {
+    return null
+  }
+}
+
 export const delay = (seconds: number) => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -154,7 +166,7 @@ export function removeQuotes(str) {
 
 export function removeSpecialCharacters(str: string) {
   // First remove newlines and quotes, then remove other special characters
-  return str.replace(/[\n"]/g, '').replace(/[^\p{L}\p{M}\p{N}\p{P}\p{S}]/gu, '')
+  return str.replace(/[\n"]/g, '').replace(/[\p{M}\p{N}\p{P}\p{S}]/gu, '')
 }
 
 export function generateColorFromChar(char: string) {
@@ -379,6 +391,10 @@ export const compareVersions = (v1: string, v2: string): number => {
     if (v1Part < v2Part) return -1
   }
   return 0
+}
+
+export function isMiniWindow() {
+  return window.location.hash === '#/mini'
 }
 
 export { classNames }

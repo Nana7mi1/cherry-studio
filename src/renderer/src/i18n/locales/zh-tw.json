@@ -64,14 +64,14 @@
       "default.description": "你好，我是預設助手。你可以立即開始與我聊天。",
       "default.name": "⭐️ 預設助手",
       "default.topic.name": "預設話題",
-      "input.clear": "清除",
+      "input.clear": "清除 {{Command}}",
       "input.clear.content": "您想要清除當前話題的所有訊息嗎？",
       "input.clear.title": "清除所有訊息？",
       "input.collapse": "收起",
       "input.context_count.tip": "上下文數量",
       "input.estimated_tokens.tip": "預估 Token 數",
       "input.expand": "展開",
-      "input.new.context": "清除上下文",
+      "input.new.context": "清除上下文 {{Command}}",
       "input.new_topic": "新話題 {{Command}}",
       "input.pause": "暫停",
       "input.placeholder": "在此輸入您的訊息...",
@@ -86,6 +86,7 @@
       "message.new.branch.created": "新分支已建立",
       "message.regenerate.model": "切換模型",
       "message.new.context": "新上下文",
+      "message.useful": "有用",
       "save": "保存",
       "settings.code_collapsible": "代码块可折叠",
       "settings.context_count": "上下文",
@@ -113,7 +114,9 @@
       "topics.move_to": "移動到",
       "topics.title": "話題",
       "translate": "翻譯",
-      "resend": "重新發送"
+      "resend": "重新發送",
+      "thinking": "思考中",
+      "deeply_thought": "已深度思考（用時 {{secounds}} 秒）"
     },
     "common": {
       "and": "與",
@@ -376,6 +379,7 @@
         "webdav.path.placeholder": "/backup",
         "webdav.autoSync": "自動備份",
         "webdav.minutes": "分鐘",
+        "webdav.hours": "小時",
         "webdav.restore.button": "從 WebDAV 恢復",
         "webdav.title": "WebDAV",
         "webdav.user": "WebDAV 使用者名稱",
@@ -384,6 +388,12 @@
         "webdav.noSync": "等待下次備份",
         "webdav.syncError": "備份錯誤",
         "webdav.lastSync": "上次同步時間"
+      },
+      "quickAssistant": {
+        "title": "快捷助手",
+        "click_tray_to_show": "點擊托盤圖標啟動",
+        "enable_quick_assistant": "啟用快捷助手",
+        "use_shortcut_to_show": "右鍵點擊托盤圖標或使用快捷鍵啟動"
       },
       "display.title": "顯示設定",
       "font_size.title": "訊息字體大小",
@@ -506,7 +516,10 @@
         "toggle_show_assistants": "切換助手顯示",
         "toggle_show_topics": "切換話題顯示",
         "copy_last_message": "複製上一条消息",
-        "search_message": "搜索消息"
+        "search_message": "搜索消息",
+        "mini_window": "快捷助手",
+        "clear_topic": "清除所有訊息",
+        "toggle_new_context": "清除上下文"
       },
       "theme.auto": "自動",
       "theme.dark": "深色主題",
@@ -539,7 +552,8 @@
     },
     "tray": {
       "quit": "退出",
-      "show_window": "顯示視窗"
+      "show_window": "顯示視窗",
+      "show_mini_window": "快捷助手"
     },
     "words": {
       "knowledgeGraph": "知識圖譜",
@@ -621,7 +635,32 @@
       }
     },
     "prompts": {
-      "summarize": "你是一名擅長會話的助理，你需要將用戶的會話總結為 10 個字以內的標題，標題語言與用戶的首要語言一致，不要使用標點符號和其他特殊符號"
+      "title": "你是一名擅長會話的助理，你需要將用戶的會話總結為 10 個字以內的標題，標題語言與用戶的首要語言一致，不要使用標點符號和其他特殊符號",
+      "explanation": "幫我解釋一下這個概念",
+      "summarize": "幫我總結一下這段話"
+    },
+    "miniwindow": {
+      "feature": {
+        "chat": "回答此問題",
+        "translate": "文本翻譯",
+        "summary": "內容總結",
+        "explanation": "解釋說明"
+      },
+      "clipboard": {
+        "empty": "剪貼板為空"
+      },
+      "input": {
+        "placeholder": {
+          "title": "你想對下方文字做什麼",
+          "empty": "詢問 {{model}} 獲取幫助..."
+        }
+      },
+      "footer": {
+        "esc": "按 ESC {{action}}",
+        "esc_close": "關閉窗口",
+        "esc_back": "返回",
+        "copy_last_message": "按 C 鍵複製"
+      }
     }
   }
 }
