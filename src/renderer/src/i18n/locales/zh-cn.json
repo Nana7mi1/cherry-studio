@@ -64,14 +64,14 @@
       "default.description": "你好，我是默认助手。你可以立刻开始跟我聊天。",
       "default.name": "⭐️ 默认助手",
       "default.topic.name": "默认话题",
-      "input.clear": "清空消息",
+      "input.clear": "清空消息 {{Command}}",
       "input.clear.content": "确定要清除当前会话所有消息吗?",
       "input.clear.title": "清空消息",
       "input.collapse": "收起",
       "input.context_count.tip": "上下文数",
       "input.estimated_tokens.tip": "预估 token 数",
       "input.expand": "展开",
-      "input.new.context": "清除上下文",
+      "input.new.context": "清除上下文 {{Command}}",
       "input.new_topic": "新话题 {{Command}}",
       "input.pause": "暂停",
       "input.placeholder": "在这里输入消息...",
@@ -86,6 +86,7 @@
       "message.new.branch.created": "新分支已创建",
       "message.regenerate.model": "切换模型",
       "message.new.context": "清除上下文",
+      "message.useful": "有用",
       "save": "保存",
       "settings.code_collapsible": "代码块可折叠",
       "settings.context_count": "上下文数",
@@ -113,7 +114,9 @@
       "topics.move_to": "移动到",
       "topics.title": "话题",
       "translate": "翻译",
-      "resend": "重新发送"
+      "resend": "重新发送",
+      "thinking": "思考中",
+      "deeply_thought": "已深度思考（用时 {{secounds}} 秒）"
     },
     "common": {
       "and": "和",
@@ -251,6 +254,10 @@
       "message.style": "消息样式",
       "message.style.bubble": "气泡",
       "message.style.plain": "简洁",
+      "message.multi_model_style": "多模型回答样式",
+      "message.multi_model_style.horizontal": "水平",
+      "message.multi_model_style.vertical": "垂直",
+      "message.multi_model_style.fold": "折叠",
       "reset.confirm.content": "确定要重置所有数据吗？",
       "reset.double.confirm.content": "你的全部数据都会丢失，如果没有备份数据，将无法恢复，确定要继续吗？",
       "reset.double.confirm.title": "数据丢失！！！",
@@ -377,6 +384,7 @@
         "webdav.path.placeholder": "/backup",
         "webdav.autoSync": "自动备份",
         "webdav.minutes": "分钟",
+        "webdav.hours": "小时",
         "webdav.restore.button": "从 WebDAV 恢复",
         "webdav.title": "WebDAV",
         "webdav.user": "WebDAV 用户名",
@@ -385,6 +393,12 @@
         "webdav.noSync": "等待下次备份",
         "webdav.syncError": "备份错误",
         "webdav.lastSync": "上次备份时间"
+      },
+      "quickAssistant": {
+        "title": "快捷助手",
+        "click_tray_to_show": "点击托盘图标启动",
+        "enable_quick_assistant": "启用快捷助手",
+        "use_shortcut_to_show": "右键点击托盘图标或使用快捷键启动"
       },
       "display.title": "显示设置",
       "font_size.title": "消息字体大小",
@@ -507,7 +521,10 @@
         "toggle_show_assistants": "切换助手显示",
         "toggle_show_topics": "切换话题显示",
         "copy_last_message": "复制上一条消息",
-        "search_message": "搜索消息"
+        "search_message": "搜索消息",
+        "mini_window": "快捷助手",
+        "clear_topic": "清空消息",
+        "toggle_new_context": "清除上下文"
       },
       "theme.auto": "跟随系统",
       "theme.dark": "深色主题",
@@ -540,7 +557,8 @@
     },
     "tray": {
       "quit": "退出",
-      "show_window": "显示窗口"
+      "show_window": "显示窗口",
+      "show_mini_window": "快捷助手"
     },
     "words": {
       "knowledgeGraph": "知识图谱",
@@ -622,7 +640,32 @@
       }
     },
     "prompts": {
-      "summarize": "你是一名擅长会话的助理，你需要将用户的会话总结为 10 个字以内的标题，标题语言与用户的首要语言一致，不要使用标点符号和其他特殊符号"
+      "title": "你是一名擅长会话的助理，你需要将用户的会话总结为 10 个字以内的标题，标题语言与用户的首要语言一致，不要使用标点符号和其他特殊符号",
+      "explanation": "帮我解释一下这个概念",
+      "summarize": "帮我总结一下这段话"
+    },
+    "miniwindow": {
+      "feature": {
+        "chat": "回答此问题",
+        "translate": "文本翻译",
+        "summary": "内容总结",
+        "explanation": "解释说明"
+      },
+      "clipboard": {
+        "empty": "剪贴板为空"
+      },
+      "input": {
+        "placeholder": {
+          "title": "你想对下方文字做什么",
+          "empty": "询问 {{model}} 获取帮助..."
+        }
+      },
+      "footer": {
+        "esc": "按 ESC {{action}}",
+        "esc_close": "关闭窗口",
+        "esc_back": "返回",
+        "copy_last_message": "按 C 键复制"
+      }
     }
   }
 }

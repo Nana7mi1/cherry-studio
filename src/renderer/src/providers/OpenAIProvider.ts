@@ -46,33 +46,6 @@ export default class OpenAIProvider extends BaseProvider {
     return providers.includes(this.provider.id)
   }
 
-  private async uploadImageToQwenLM(image_file: Buffer, file_name: string, mime: string): Promise<string> {
-    try {
-      // 创建 FormData
-      const formData = new FormData()
-      formData.append('file', new Blob([image_file], { type: mime }), file_name)
-
-      // 发送上传请求
-      const response = await fetch(`${this.provider.apiHost}v1/files/`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`
-        },
-        body: formData
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to upload image to QwenLM')
-      }
-
-      const data = await response.json()
-      return data.id
-    } catch (error) {
-      console.error('Error uploading image to QwenLM:', error)
-      throw error
-    }
-  }
-
   private async getMessageParam(
     message: Message,
     model: Model
@@ -121,34 +94,6 @@ export default class OpenAIProvider extends BaseProvider {
       }
     ]
 
-    //QwenLM上传图片
-    if (this.provider.id === 'qwenlm') {
-      const qwenlm_image_url: { type: string; image: string }[] = []
-
-      for (const file of message.files || []) {
-        if (file.type === FileTypes.IMAGE && isVision) {
-          const image = await window.api.file.binaryFile(file.id + file.ext)
-
-          const imageId = await this.uploadImageToQwenLM(image.data, file.origin_name, image.mime)
-          qwenlm_image_url.push({
-            type: 'image',
-            image: imageId
-          })
-        }
-        if ([FileTypes.TEXT, FileTypes.DOCUMENT].includes(file.type)) {
-          const fileContent = await (await window.api.file.read(file.id + file.ext)).trim()
-          parts.push({
-            type: 'text',
-            text: file.origin_name + '\n' + fileContent
-          })
-        }
-      }
-      return {
-        role: message.role,
-        content: [...parts, ...qwenlm_image_url]
-      } as ChatCompletionMessageParam
-    }
-
     for (const file of message.files || []) {
       if (file.type === FileTypes.IMAGE && isVision) {
         const image = await window.api.file.base64Image(file.id + file.ext)
@@ -172,6 +117,20 @@ export default class OpenAIProvider extends BaseProvider {
     } as ChatCompletionMessageParam
   }
 
+  private getTemperature(assistant: Assistant, model: Model) {
+    const isOpenAIo1 = model.id.startsWith('o1')
+
+    if (isOpenAIo1) {
+      return undefined
+    }
+
+    if (model.provider === 'deepseek' && model.id === 'deepseek-reasoner') {
+      return undefined
+    }
+
+    return assistant?.settings?.temperature
+  }
+
   async completions({ messages, assistant, onChunk, onFilterMessages }: CompletionsParams): Promise<void> {
     const defaultModel = getDefaultModel()
     const model = assistant.model || defaultModel
@@ -183,15 +142,17 @@ export default class OpenAIProvider extends BaseProvider {
     const _messages = filterContextMessages(takeRight(messages, contextCount + 1))
     onFilterMessages(_messages)
 
-    if (this.provider.id === 'qwenlm' && _messages[0]?.role !== 'user') {
-      userMessages.push({ role: 'user', content: '' })
+    if (model.id === 'deepseek-reasoner') {
+      if (_messages[0]?.role !== 'user') {
+        userMessages.push({ role: 'user', content: '' })
+      }
     }
 
     for (const message of _messages) {
       userMessages.push(await this.getMessageParam(message, model))
     }
 
-    const isOpenAIo1 = model.id.includes('o1-')
+    const isOpenAIo1 = model.id.startsWith('o1')
 
     const isSupportStreamOutput = () => {
       if (this.provider.id === 'github' && isOpenAIo1) {
@@ -201,6 +162,7 @@ export default class OpenAIProvider extends BaseProvider {
     }
 
     let time_first_token_millsec = 0
+    let time_first_content_millsec = 0
     const start_time_millsec = new Date().getTime()
 
     // @ts-ignore key is not typed
@@ -209,7 +171,7 @@ export default class OpenAIProvider extends BaseProvider {
       messages: [isOpenAIo1 ? undefined : systemMessage, ...userMessages].filter(
         Boolean
       ) as ChatCompletionMessageParam[],
-      temperature: isOpenAIo1 ? 1 : assistant?.settings?.temperature,
+      temperature: this.getTemperature(assistant, model),
       top_p: assistant?.settings?.topP,
       max_tokens: maxTokens,
       keep_alive: this.keepAliveTime,
@@ -231,61 +193,38 @@ export default class OpenAIProvider extends BaseProvider {
       })
     }
 
-    // 处理QwenLM的流式输出
-    if (this.provider.id === 'qwenlm') {
-      let accumulatedText = ''
-      for await (const chunk of stream) {
-        if (window.keyv.get(EVENT_NAMES.CHAT_COMPLETION_PAUSED)) {
-          break
-        }
-        if (time_first_token_millsec == 0) {
-          time_first_token_millsec = new Date().getTime() - start_time_millsec
-        }
-
-        // 获取当前块的完整内容
-        const currentContent = chunk.choices[0]?.delta?.content || ''
-
-        // 如果内容与累积的内容不同，则只发送增量部分
-        if (currentContent !== accumulatedText) {
-          const deltaText = currentContent.slice(accumulatedText.length)
-          accumulatedText = currentContent // 更新累积的文本
-
-          const time_completion_millsec = new Date().getTime() - start_time_millsec
-          onChunk({
-            text: deltaText,
-            usage: chunk.usage,
-            metrics: {
-              completion_tokens: chunk.usage?.completion_tokens,
-              time_completion_millsec,
-              time_first_token_millsec
-            }
-          })
-        }
-      }
-      return
-    }
-
     for await (const chunk of stream) {
       if (window.keyv.get(EVENT_NAMES.CHAT_COMPLETION_PAUSED)) {
         break
       }
+
       if (time_first_token_millsec == 0) {
         time_first_token_millsec = new Date().getTime() - start_time_millsec
       }
+
+      if (time_first_content_millsec == 0 && chunk.choices[0]?.delta?.content) {
+        time_first_content_millsec = new Date().getTime()
+      }
+
       const time_completion_millsec = new Date().getTime() - start_time_millsec
+      const time_thinking_millsec = time_first_content_millsec ? time_first_content_millsec - start_time_millsec : 0
+
       onChunk({
         text: chunk.choices[0]?.delta?.content || '',
+        // @ts-ignore key is not typed
+        reasoning_content: chunk.choices[0]?.delta?.reasoning_content || '',
         usage: chunk.usage,
         metrics: {
           completion_tokens: chunk.usage?.completion_tokens,
           time_completion_millsec,
-          time_first_token_millsec
+          time_first_token_millsec,
+          time_thinking_millsec
         }
       })
     }
   }
 
-  async translate(message: Message, assistant: Assistant) {
+  async translate(message: Message, assistant: Assistant, onResponse?: (text: string) => void) {
     const defaultModel = getDefaultModel()
     const model = assistant.model || defaultModel
     const messages = [
@@ -293,16 +232,41 @@ export default class OpenAIProvider extends BaseProvider {
       { role: 'user', content: message.content }
     ]
 
+    const isOpenAIo1 = model.id.startsWith('o1')
+
+    const isSupportedStreamOutput = () => {
+      if (!onResponse) {
+        return false
+      }
+      if (this.provider.id === 'github' && isOpenAIo1) {
+        return false
+      }
+      return true
+    }
+
+    const stream = isSupportedStreamOutput()
+
     // @ts-ignore key is not typed
     const response = await this.sdk.chat.completions.create({
       model: model.id,
       messages: messages as ChatCompletionMessageParam[],
-      stream: false,
+      stream,
       keep_alive: this.keepAliveTime,
       temperature: assistant?.settings?.temperature
     })
 
-    return response.choices[0].message?.content || ''
+    if (!stream) {
+      return response.choices[0].message?.content || ''
+    }
+
+    let text = ''
+
+    for await (const chunk of response) {
+      text += chunk.choices[0]?.delta?.content || ''
+      onResponse?.(text)
+    }
+
+    return text
   }
 
   public async summaries(messages: Message[], assistant: Assistant): Promise<string> {
@@ -322,7 +286,7 @@ export default class OpenAIProvider extends BaseProvider {
 
     const systemMessage = {
       role: 'system',
-      content: getStoreSetting('topicNamingPrompt') || i18n.t('prompts.summarize')
+      content: getStoreSetting('topicNamingPrompt') || i18n.t('prompts.title')
     }
 
     const userMessage = {

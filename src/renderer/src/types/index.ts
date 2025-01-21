@@ -47,6 +47,7 @@ export type Message = {
   assistantId: string
   role: 'user' | 'assistant'
   content: string
+  reasoning_content?: string
   translatedContent?: string
   topicId: string
   createdAt: string
@@ -65,12 +66,15 @@ export type Message = {
     // Gemini
     groundingMetadata?: any
   }
+  askId?: string
+  useful?: boolean
 }
 
 export type Metrics = {
   completion_tokens?: number
   time_completion_millsec?: number
   time_first_token_millsec?: number
+  time_thinking_millsec?: number
 }
 
 export type Topic = {
@@ -101,7 +105,7 @@ export type Provider = {
   isSystem?: boolean
 }
 
-export type ProviderType = 'openai' | 'anthropic' | 'gemini'
+export type ProviderType = 'openai' | 'anthropic' | 'gemini' | 'qwenlm'
 
 export type ModelType = 'text' | 'vision' | 'embedding'
 
@@ -137,7 +141,7 @@ export interface Painting {
 export type MinAppType = {
   id?: string | number
   name: string
-  logo: string
+  logo?: string
   url: string
   bodered?: boolean
   background?: string

@@ -1,7 +1,7 @@
 import i18n from '@renderer/i18n'
 import store from '@renderer/store'
 import { setGenerating } from '@renderer/store/runtime'
-import { Assistant, Message, Model, Provider, Suggestion, Topic } from '@renderer/types'
+import { Assistant, Message, Model, Provider, Suggestion } from '@renderer/types'
 import { isEmpty } from 'lodash'
 
 import AiProvider from '../providers/AiProvider'
@@ -13,7 +13,7 @@ import {
   getTranslateModel
 } from './AssistantService'
 import { EVENT_NAMES, EventEmitter } from './EventService'
-import { filterMessages } from './MessagesService'
+import { filterMessages, filterUsefulMessages } from './MessagesService'
 import { estimateMessagesUsage } from './TokenService'
 
 export async function fetchChatCompletion({
@@ -24,7 +24,6 @@ export async function fetchChatCompletion({
 }: {
   message: Message
   messages: Message[]
-  topic: Topic
   assistant: Assistant
   onResponse: (message: Message) => void
 }) {
@@ -54,13 +53,17 @@ export async function fetchChatCompletion({
     let _messages: Message[] = []
 
     await AI.completions({
-      messages,
+      messages: filterUsefulMessages(messages),
       assistant,
       onFilterMessages: (messages) => (_messages = messages),
-      onChunk: ({ text, usage, metrics, search }) => {
+      onChunk: ({ text, reasoning_content, usage, metrics, search }) => {
         message.content = message.content + text || ''
         message.usage = usage
         message.metrics = metrics
+
+        if (reasoning_content) {
+          message.reasoning_content = (message.reasoning_content || '') + reasoning_content
+        }
 
         if (search) {
           message.metadata = { groundingMetadata: search }
@@ -102,7 +105,13 @@ export async function fetchChatCompletion({
   return message
 }
 
-export async function fetchTranslate({ message, assistant }: { message: Message; assistant: Assistant }) {
+interface FetchTranslateProps {
+  message: Message
+  assistant: Assistant
+  onResponse?: (text: string) => void
+}
+
+export async function fetchTranslate({ message, assistant, onResponse }: FetchTranslateProps) {
   const model = getTranslateModel()
 
   if (!model) {
@@ -118,7 +127,7 @@ export async function fetchTranslate({ message, assistant }: { message: Message;
   const AI = new AiProvider(provider)
 
   try {
-    return await AI.translate(message, assistant)
+    return await AI.translate(message, assistant, onResponse)
   } catch (error: any) {
     return ''
   }
